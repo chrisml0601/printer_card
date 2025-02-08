@@ -330,11 +330,6 @@ cards:
       entity: input_boolean.3d_printer_camera_view
       tap_action:
         action: toggle
-      double_tap_action:
-        action: call-service
-        service: input_boolean.toggle
-        target:
-          entity_id: input_boolean.3d_printer_stl_preview
       hold_action:
         action: navigate
         navigation_path: /lovelace/3d-printer
