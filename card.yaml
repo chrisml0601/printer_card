@@ -10,15 +10,10 @@ cards:
       navigation_path: /lovelace/3d-printer
     secondary: >-
       {% if is_state('sensor.octoprint_print_status','Printing') or
-
       is_state('sensor.octoprint_print_status','Resuming') or
-
       is_state('sensor.octoprint_print_status','Pausing') or
-
       is_state('sensor.octoprint_print_status','Paused') %}
-
-      {{ (states('sensor.octoprint_print_progress') | string | float |
-      default(0, true)) | round(0) }}%
+      {{ (states('sensor.octoprint_print_progress') | default(0) | string | float | round(0)) }}%
       {{states('sensor.octoprint_print_status')}}
         {% set list = states('sensor.octoprint_print_file').split('_') %}
         {{list[list | length-3]}}
@@ -71,21 +66,14 @@ cards:
         mushroom-shape-icon$: |
           .shape {
             {% if is_state('sensor.octoprint_print_status','Printing') or is_state('sensor.octoprint_print_status','Resuming') %}
-              background: radial-gradient(var(--card-background-color) 60%, transparent 0%), conic-gradient(rgb(252,109,9) {% if states('sensor.octoprint_print_progress') | is_number %}{{ states('sensor.octoprint_print_progress') | float | round(0) }}{% else %}0{% endif %}% 0%, var(--card-background-color) 0% 100%);
+              background: radial-gradient(var(--card-background-color) 60%, transparent 0%), conic-gradient(rgb(252,109,9) {% if states('sensor.octoprint_print_progress') | is_number %}{{ states('sensor.octoprint_print_progress') | default (0) | float | round(0) }}{% else %}0{% endif %}% 0%, var(--card-background-color) 0% 100%);
             {% elif is_state('sensor.octoprint_print_status','Operational') %}
               background: radial-gradient(var(--card-background-color) 60%, transparent 0%), conic-gradient(rgb(53,190,37) 100% 0%, var(--card-background-color) 0% 100%);              
             {% elif is_state('sensor.octoprint_print_status','Cancelling') or is_state('sensor.octoprint_print_status','Error') or is_state('sensor.octoprint_print_status','Offline after error')%}
               background: radial-gradient(var(--card-background-color) 60%, transparent 0%), conic-gradient(red 100% 0%, var(--card-background-color) 0% 100%);              
             {% else %}
-              background: radial-gradient(var(--card-background-color) 60%, transparent 0%), conic-gradient(#9e9e9e {% if states('sensor.octoprint_print_progress') | is_number %}{{ states('sensor.octoprint_print_progress') | float | round(0) }}{% else %}0{% endif %}% 0%, var(--card-background-color) 0% 100%);
+              background: radial-gradient(var(--card-background-color) 60%, transparent 0%), conic-gradient(#9e9e9e {% if states('sensor.octoprint_print_progress') | is_number %}{{ states('sensor.octoprint_print_progress') | default (0) | float | round(0) }}{% else %}0{% endif %}% 0%, var(--card-background-color) 0% 100%);
             {% endif %}
-          }
-          .shape:after {
-            content: "";
-            height: 100%;
-            width: 100%;
-            position: absolute;
-            border-radius: 50%;
           }
           .shape:after {
             content: "";
@@ -114,7 +102,7 @@ cards:
     chips:
       - type: template
         content: >-
-          {{ (((states('sensor.octoprint_actual_tool0_temp') | float - 32) * 5 /
+          {{ (((states('sensor.octoprint_actual_tool0_temp') | default(0) | float - 32) * 5 /
           9) | round(1) )}} °C
         icon: mdi:printer-3d-nozzle-heat
         entity: sensor.octoprint_actual_tool0_temp
@@ -130,7 +118,7 @@ cards:
             }
       - type: template
         content: >-
-          {{ (((states('sensor.octoprint_actual_bed_temp') | float - 32) * 5 /
+          {{ (((states('sensor.octoprint_actual_bed_temp') | default(0) | float - 32) * 5 /
           9) | round(1) )}} °C
         icon: mdi:heating-coil
         entity: sensor.octoprint_actual_bed_temp
@@ -194,7 +182,7 @@ cards:
         chip:
           type: template
           content: >
-            {% if now().day ==
+            {% if states('sensor.octoprint_estimated_finish_time') != 'unavailable' and now().day ==
             as_timestamp(states('sensor.octoprint_estimated_finish_time')) |
             timestamp_custom('%d') | int %}
               Today {{as_timestamp(states('sensor.octoprint_estimated_finish_time')) | timestamp_custom ('%H:%M') }}
