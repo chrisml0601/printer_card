@@ -12,9 +12,9 @@ cards:
       {% if is_state('sensor.octoprint_print_status','Printing') or
       is_state('sensor.octoprint_print_status','Resuming') or
       is_state('sensor.octoprint_print_status','Pausing') or
-      is_state('sensor.octoprint_print_status','Paused') %}
-      {{ (states('sensor.octoprint_print_progress') | default(0) | string | float | round(0)) }}%
-      {{states('sensor.octoprint_print_status')}}
+      is_state('sensor.octoprint_print_status','Paused') %} {{
+      (states('sensor.octoprint_print_progress') | default(0) | string | float |
+      round(0)) }}% {{states('sensor.octoprint_print_status')}}
         {% set list = states('sensor.octoprint_print_file').split('_') %}
         {{list[list | length-3]}}
       {% else %}
@@ -102,8 +102,11 @@ cards:
     chips:
       - type: template
         content: >-
-          {{ (((states('sensor.octoprint_actual_tool0_temp') | default(0) | float - 32) * 5 /
-          9) | round(1) )}} °C
+          {% if states('sensor.octoprint_actual_tool0_temp') is number %}
+            {{ (((states('sensor.octoprint_actual_tool0_temp') | float - 32) * 5 / 9) | round(1)) }} °C
+          {% else %}
+            -- °C
+          {% endif %}
         icon: mdi:printer-3d-nozzle-heat
         entity: sensor.octoprint_actual_tool0_temp
         tap_action:
@@ -118,8 +121,11 @@ cards:
             }
       - type: template
         content: >-
-          {{ (((states('sensor.octoprint_actual_bed_temp') | default(0) | float - 32) * 5 /
-          9) | round(1) )}} °C
+          {% if states('sensor.octoprint_actual_bed_temp') is number %}
+            {{ (((states('sensor.octoprint_actual_bed_temp') | float - 32) * 5 / 9) | round(1)) }} °C
+          {% else %}
+            -- °C
+          {% endif %}
         icon: mdi:heating-coil
         entity: sensor.octoprint_actual_bed_temp
         tap_action:
@@ -182,7 +188,8 @@ cards:
         chip:
           type: template
           content: >
-            {% if states('sensor.octoprint_estimated_finish_time') != 'unavailable' and now().day ==
+            {% if states('sensor.octoprint_estimated_finish_time') !=
+            'unavailable' and now().day ==
             as_timestamp(states('sensor.octoprint_estimated_finish_time')) |
             timestamp_custom('%d') | int %}
               Today {{as_timestamp(states('sensor.octoprint_estimated_finish_time')) | timestamp_custom ('%H:%M') }}
