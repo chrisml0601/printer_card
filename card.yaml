@@ -102,7 +102,7 @@ cards:
     chips:
       - type: template
         content: >-
-          {% if states('sensor.octoprint_actual_tool0_temp') is number %}
+          {% if states('sensor.octoprint_actual_tool0_temp') not in ['unknown', 'unavailable', 'none'] %}
             {{ (((states('sensor.octoprint_actual_tool0_temp') | float - 32) * 5 / 9) | round(1)) }} °C
           {% else %}
             -- °C
@@ -121,7 +121,7 @@ cards:
             }
       - type: template
         content: >-
-          {% if states('sensor.octoprint_actual_bed_temp') is number %}
+          {% if states('sensor.octoprint_actual_bed_temp') not in ['unknown', 'unavailable', 'none'] %}
             {{ (((states('sensor.octoprint_actual_bed_temp') | float - 32) * 5 / 9) | round(1)) }} °C
           {% else %}
             -- °C
