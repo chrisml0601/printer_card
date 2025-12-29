@@ -188,21 +188,19 @@ cards:
         chip:
           type: template
           content: >
-            {% if states('sensor.octoprint_estimated_finish_time') !=
-            'unavailable' and now().day ==
-            as_timestamp(states('sensor.octoprint_estimated_finish_time')) |
-            timestamp_custom('%d') | int %}
-              Today {{as_timestamp(states('sensor.octoprint_estimated_finish_time')) | timestamp_custom ('%H:%M') }}
-            {% elif now().day <
-            as_timestamp(states('sensor.octoprint_estimated_finish_time')) |
-            timestamp_custom('%d') | int %}
-              Tmrw {{as_timestamp(states('sensor.octoprint_estimated_finish_time')) | timestamp_custom ('%H:%M') }}
-            {% elif utcnow().day >
-            as_timestamp(states('sensor.octoprint_estimated_finish_time')) |
-            timestamp_custom('%d') | int %}
-              Null
-            {% else %} 
-              {{as_timestamp(states('sensor.octoprint_estimated_finish_time')) | timestamp_custom ('%b %d %H:%M') }} 
+            {% if has_value('sensor.octoprint_estimated_finish_time') %}
+              {% set finish_time = as_timestamp(states('sensor.octoprint_estimated_finish_time')) %}
+              {% if now().day == finish_time | timestamp_custom('%d') | int %}
+                Today {{ finish_time | timestamp_custom('%H:%M') }}
+              {% elif now().day < finish_time | timestamp_custom('%d') | int %}
+                Tmrw {{ finish_time | timestamp_custom('%H:%M') }}
+              {% elif now().day > finish_time | timestamp_custom('%d') | int %}
+                Null
+              {% else %}
+                {{ finish_time | timestamp_custom('%b %d %H:%M') }}
+              {% endif %}
+            {% else %}
+              --
             {% endif %}
           icon: mdi:clock-check-outline
           entity: sensor.octoprint_estimated_finish_time
